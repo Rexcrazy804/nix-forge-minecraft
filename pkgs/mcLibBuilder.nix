@@ -32,7 +32,7 @@ stdenv.mkDerivation (final: {
     if [-f "forge-${mcVersion}-${forgeVersion}-shim.jar" ]; then 
       cp forge-${mcVersion}-${forgeVersion}-shim.jar $out
     else
-      echo "nothing here" > $out/forge-${mcVersion}-${forgeVersion}-shim.jar
+      cp $src $out/forge-${mcVersion}-${forgeVersion}-shim.jar
     fi
   '';
 

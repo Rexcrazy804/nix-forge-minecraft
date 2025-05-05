@@ -11,9 +11,14 @@
   virtualisation = {
     graphics = false;
     diskSize = 10 * 1024;
-    memorySize = 2 * 1024;
+    memorySize = 4 * 1024;
+    cores = 4;
     forwardPorts = [
-      {from = "host"; host.port = 25565; guest.port = 25565;}
+      {
+        from = "host";
+        host.port = 25565;
+        guest.port = 25565;
+      }
     ];
   };
 
@@ -63,16 +68,17 @@
   };
 
   systemd.user.tmpfiles.users."sumee".rules = let
-    mcVersion = "1.21.5";
-    forgeVersion = "55.0.9";
+    mcVersion = "1.20.1";
+    forgeVersion = "47.3.0";
     mcLibs = pkgs.callPackage ../pkgs/mcLibBuilder.nix {
       inherit mcVersion forgeVersion;
-      installerHash = "sha256-I1Qf9xdiQLjLZzZkPpjVh3a940JsRHCJKl5ehVXv01Q=";
-      libHash = "sha256-0nTBjm3jm6WLwPch0fnDtqdU25u5Ypm2aofWfWe82io=";
+      installerHash = "sha256-YBirzpXMBYdo42WGX9fPO9MbXFUyMdr4hdw4X81th1o=";
+      libHash = "sha256-8I6tAOAhaQZzjUtbI137pzL6lw/I3taxuK4EZx6cRIs=";
     };
     home = config.users.users.sumee.home;
+
+    # ${pkgs.jdk23}/bin/java -jar ${mcLibs.shim-name} --onlyCheckJava || exit 1
     runner = pkgs.writeShellScriptBin "run.sh" ''
-      ${pkgs.jdk23}/bin/java -jar ${mcLibs.shim-name} --onlyCheckJava || exit 1
       ${pkgs.jdk23}/bin/java @user_jvm_args.txt @libraries/net/minecraftforge/forge/${mcVersion}-${forgeVersion}/unix_args.txt "$@"
     '';
     user_jvm_args = pkgs.writeText "user_jvm_args.txt" ''
@@ -89,27 +95,63 @@
 
     # yes
     serverproperties = pkgs.writeText "server.properties" (builtins.concatStringsSep "\n" [
-      "enable-jmx-monitoring=false" "rcon.port=25575" "level-seed="
-      "gamemode=survival" "enable-command-block=false" "enable-query=false"
-      "generator-settings={}" "enforce-secure-profile=true" "level-name=world"
-      "motd=A Minecraft Server" "query.port=25565" "pvp=true"
-      "generate-structures=true" "max-chained-neighbor-updates=1000000"
-      "difficulty=easy" "network-compression-threshold=256"
-      "max-tick-time=60000" "require-resource-pack=false"
-      "use-native-transport=true" "max-players=20" "online-mode=true"
-      "enable-status=true" "allow-flight=false" "initial-disabled-packs="
-      "broadcast-rcon-to-ops=true" "view-distance=10" "server-ip="
-      "resource-pack-prompt=" "allow-nether=true" "server-port=25565"
-      "enable-rcon=false" "sync-chunk-writes=true" "op-permission-level=4"
-      "prevent-proxy-connections=false" "hide-online-players=false"
-      "resource-pack=" "entity-broadcast-range-percentage=100"
-      "simulation-distance=10" "rcon.password=" "player-idle-timeout=0"
-      "force-gamemode=false" "rate-limit=0" "hardcore=false" "white-list=false"
-      "broadcast-console-to-ops=true" "spawn-npcs=true" "spawn-animals=true"
-      "log-ips=true" "function-permission-level=2"
-      "initial-enabled-packs=vanilla" "level-type=minecraft\:normal"
-      "text-filtering-config=" "spawn-monsters=true" "enforce-whitelist=false"
-      "spawn-protection=16" "resource-pack-sha1=" "max-world-size=29999984"
+      "enable-jmx-monitoring=false"
+      "rcon.port=25575"
+      "level-seed="
+      "gamemode=survival"
+      "enable-command-block=false"
+      "enable-query=false"
+      "generator-settings={}"
+      "enforce-secure-profile=true"
+      "level-name=world"
+      "motd=A Minecraft Server"
+      "query.port=25565"
+      "pvp=true"
+      "generate-structures=true"
+      "max-chained-neighbor-updates=1000000"
+      "difficulty=easy"
+      "network-compression-threshold=256"
+      "max-tick-time=60000"
+      "require-resource-pack=false"
+      "use-native-transport=true"
+      "max-players=20"
+      "online-mode=true"
+      "enable-status=true"
+      "allow-flight=false"
+      "initial-disabled-packs="
+      "broadcast-rcon-to-ops=true"
+      "view-distance=10"
+      "server-ip="
+      "resource-pack-prompt="
+      "allow-nether=true"
+      "server-port=25565"
+      "enable-rcon=false"
+      "sync-chunk-writes=true"
+      "op-permission-level=4"
+      "prevent-proxy-connections=false"
+      "hide-online-players=false"
+      "resource-pack="
+      "entity-broadcast-range-percentage=100"
+      "simulation-distance=10"
+      "rcon.password="
+      "player-idle-timeout=0"
+      "force-gamemode=false"
+      "rate-limit=0"
+      "hardcore=false"
+      "white-list=false"
+      "broadcast-console-to-ops=true"
+      "spawn-npcs=true"
+      "spawn-animals=true"
+      "log-ips=true"
+      "function-permission-level=2"
+      "initial-enabled-packs=vanilla"
+      "level-type=minecraft\:normal"
+      "text-filtering-config="
+      "spawn-monsters=true"
+      "enforce-whitelist=false"
+      "spawn-protection=16"
+      "resource-pack-sha1="
+      "max-world-size=29999984"
     ]);
   in [
     "L+ '${home}/forge/libraries' - - - - ${mcLibs}/libraries"
@@ -117,9 +159,27 @@
     "L+ '${home}/forge/run.sh' - - - - ${runner}/bin/run.sh"
     "L+ '${home}/forge/user_jvm_args.txt' - - - - ${user_jvm_args}"
     "L+ '${home}/forge/server.properties' - - - - ${serverproperties}"
-
-    "f ${home}/forge/eula.txt 770 sumee sumee - eula=true"
+    "f '${home}/forge/eula.txt' 770 sumee sumee - eula=true"
   ];
+
+  systemd.services.modpack = let
+    modpack = pkgs.callPackage ../pkgs/modpacks/gravitas.nix {};
+    copyModpack = pkgs.writeShellScriptBin "copy.sh" ''
+      mkdir -p forge
+      cp -r -u ${modpack}/* ./forge
+      chown -hR sumee:sumee ./forge
+      chmod -hR ug+rwx ./forge
+    '';
+  in {
+    enable = true;
+    # we'll prolly have to disable this after first run prolly
+    description = "Forge Minecraft Server";
+    serviceConfig = {
+      ExecStart = "${copyModpack}/bin/copy.sh";
+      WorkingDirectory = "${config.users.users.sumee.home}";
+    };
+    wantedBy = ["multi-user.target"];
+  };
 
   systemd.services.minecraft = {
     enable = true;
@@ -128,7 +188,7 @@
       ExecStart = "${config.users.users.sumee.home}/forge/run.sh";
       WorkingDirectory = "${config.users.users.sumee.home}/forge";
       Restart = "always";
-      RestartSec = 60;
+      RestartSec = 20;
     };
     after = ["network.target"];
     wantedBy = ["multi-user.target"];
