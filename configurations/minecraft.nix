@@ -65,7 +65,7 @@
   systemd.user.tmpfiles.users."sumee".rules = let
     mcVersion = "1.21.5";
     forgeVersion = "55.0.9";
-    mcLibs = pkgs.callPackage ../pkgs/mcLibs.nix {
+    mcLibs = pkgs.callPackage ../pkgs/mcLibBuilder.nix {
       inherit mcVersion forgeVersion;
       installerHash = "sha256-I1Qf9xdiQLjLZzZkPpjVh3a940JsRHCJKl5ehVXv01Q=";
       libHash = "sha256-0nTBjm3jm6WLwPch0fnDtqdU25u5Ypm2aofWfWe82io=";

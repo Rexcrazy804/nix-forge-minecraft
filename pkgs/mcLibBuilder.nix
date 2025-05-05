@@ -24,10 +24,16 @@ stdenv.mkDerivation (final: {
     java -jar $src --installServer
   '';
 
-  installPhase = ''
+  installPhase = /*bash*/ ''
     mkdir $out
     cp -r libraries $out/libraries
-    cp forge-${mcVersion}-${forgeVersion}-shim.jar $out
+
+    # only copy if the file exists
+    if [-f "forge-${mcVersion}-${forgeVersion}-shim.jar" ]; then 
+      cp forge-${mcVersion}-${forgeVersion}-shim.jar $out
+    else
+      echo "nothing here" > $out/forge-${mcVersion}-${forgeVersion}-shim.jar
+    fi
   '';
 
   outputHashMode = "recursive";

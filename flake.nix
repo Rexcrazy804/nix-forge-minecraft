@@ -32,14 +32,15 @@
         format = "vm";
       };
 
-      mcLibs = pkgs.callPackage ./pkgs/mcLibs.nix {
-        mcVersion = "1.21.5";
-        forgeVersion = "55.0.9";
-        installerHash = "sha256-I1Qf9xdiQLjLZzZkPpjVh3a940JsRHCJKl5ehVXv01Q=";
-        libHash = "sha256-0nTBjm3jm6WLwPch0fnDtqdU25u5Ypm2aofWfWe82io=";
+      mcLibs = pkgs.callPackage ./pkgs/mcLibBuilder.nix {
+        mcVersion = "1.20.1";
+        forgeVersion = "47.3.0";
+        installerHash = "sha256-YBirzpXMBYdo42WGX9fPO9MbXFUyMdr4hdw4X81th1o=";
+        libHash = "sha256-nvrOhGtOWAxUKarCneAvmLB0Sp6QOlPmtDgudZFQDo8=";
       };
-
       mcTextRunner = pkgs.callPackage ./pkgs/hackyRunner.nix {inherit mcLibs;};
+
+      default = minecraftVM;
     });
   };
 }
