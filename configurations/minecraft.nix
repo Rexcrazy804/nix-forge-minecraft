@@ -40,6 +40,10 @@
   };
 
   security.sudo.wheelNeedsPassword = false;
+  environment.shellAliases = {
+    startMc = "sudo systemctl start minecraft.service";
+    mcLogs = "journalctl -b -f -u minecraft.service";
+  };
   nix = {
     settings.experimental-features = [
       "nix-command"
@@ -56,17 +60,6 @@
 
   # starting point for minecraft forge specific configuration
   # largely a derivation of https://gist.github.com/cyber-murmel/4aeae3b5dafc72f12827b3284a9da481
-  users = {
-    # groups.minecraft = {}; defined earlier
-    extraUsers.minecraft = {
-      isSystemUser = true;
-      group = "minecraft";
-      home = "/var/minecraft";
-      createHome = true;
-      initialPassword = "greatpass";
-    };
-  };
-
   systemd.user.tmpfiles.users."sumee".rules = let
     mcVersion = "1.20.1";
     forgeVersion = "47.3.0";
